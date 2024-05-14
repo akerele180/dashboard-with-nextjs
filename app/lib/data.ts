@@ -91,13 +91,14 @@ export async function fetchCardData() {
   }
 }
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE: number = Number(6);
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
 ) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   noStore();
+  const offset: number = (currentPage - 1) * ITEMS_PER_PAGE;
+
   try {
     const invoices = await sql<InvoicesTable>`
       SELECT
@@ -108,16 +109,21 @@ export async function fetchFilteredInvoices(
         customers.name,
         customers.email,
         customers.image_url
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      WHERE
+      FROM 
+        invoices
+      JOIN 
+        customers 
+      ON 
+        invoices.customer_id = customers.id
+      WHERE 
         customers.name ILIKE ${`%${query}%`} OR
         customers.email ILIKE ${`%${query}%`} OR
+        invoices.status ILIKE ${`%${query}%`} OR
         invoices.amount::text ILIKE ${`%${query}%`} OR
-        invoices.date::text ILIKE ${`%${query}%`} OR
-        invoices.status ILIKE ${`%${query}%`}
-      ORDER BY invoices.date DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+        invoices.date::text ILIKE ${`%${query}%`}
+      ORDER BY 
+        invoices.date DESC
+      LIMIT 6
     `;
 
     return invoices.rows;
